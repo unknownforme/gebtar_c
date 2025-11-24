@@ -204,13 +204,8 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int view_size = 2
         boss_texture = {bgCyan(red("▛▜"))};
     } else if (view_size == 2) {
         player_texture = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
-//        player_texture = {"a ", "a ", "a ", "a "};
-//        boss_texture = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
         boss_texture = {white("▞▛"), white("▜█"), white("▛▛"), white("▛ ")};
         boss_texture_right = {white("█▛"), white("▜▚"), white(" ▜"), white(" ▜▜")};
-
-//        boss_texture = {"a ", "a ", "a ", "a "};
-
     } else if (view_size == 3) {
         boss_texture = {
             "▟█", "██", "█▙",
@@ -230,23 +225,29 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int view_size = 2
             cyan("▜"), purple("█") + cyan("▛"), yellow("▀") + cyan("▜█"),
             cyan("▝") + yellow("▚"), yellow("▃▙"), yellow("▟▍")};
 
-//['▘','▝','▀','▖','▍','▞','▛','▗','▚','▐','▜','▃','▙','▟','█',' ']
+        //['▘','▝','▀','▖','▍','▞','▛','▗','▚','▐','▜','▃','▙','▟','█',' ']
 
-//player
-//▟████▙
-//█▛▀▜█▛
-//▟▙▟▃▞▘
+        //player
+        //▟████▙
+        //█▛▀▜█▛
+        //▟▙▟▃▞▘
 
-//boss
-//▟████▙
-//▖▐▀▍▗█
-//▀▙▙█▛▘
+        //boss
+        //▟████▙
+        //▖▐▀▍▗█
+        //▀▙▙█▛▘
 
     } else {
         cout << "make your own textures" << endl;
         exit(0);
     }
-
+    for (int y = 0; y < arena_size; y++) {
+        auto testing = find(boss_grid[y].begin(),boss_grid[y].end(), 255);
+        if (testing != boss_grid[y].end()) {
+        cout << "wowa" << endl;
+        }
+    }
+    bool encountered_player_first = false, encountered_boss_first = false;
     for (int y = 0; y < arena_size; y++) {//controls vertical lines
         for (int sizeY = 0; sizeY < view_size; sizeY++) {//controls vertical scaling
             for (int x = 0; x < arena_size * 2; x++) {//controls horizontal lines
@@ -273,10 +274,22 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int view_size = 2
                             cout << bgWhite("  ");
                         break;
                         case 100://boss
+                            if (!encountered_boss_first && !encountered_player_first) {
+                                encountered_boss_first = true;
+                                boss_texture = boss_texture_right;
+                            } else if (!encountered_boss_first) {
+                                boss_texture = boss_texture_left;
+                            }
+
                             cout << boss_texture[boss_texture_part];
                             ++boss_texture_part;
                         break;
                         case 255://player
+                            if (!encountered_boss_first && !encountered_player_first) {
+                                encountered_player_first = true;
+                            } else if (!encountered_player_first) {
+                                player_texture = player_texture_left;
+                            }
                             cout << player_texture[player_texture_part];
                             ++player_texture_part;
                         break;
@@ -295,7 +308,7 @@ void PsRandField(int seed)
     string userReturns, test;
     int color_types, view_size, number_of_types, boss_hp, player_hp, arena_size;
     view_size = 3;
-    arena_size = 3;
+    arena_size = 5;
     vector<vector<int>> boss_grid;
     color_types = 5;
     boss_hp = 10000;
