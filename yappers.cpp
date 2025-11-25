@@ -91,6 +91,9 @@ void damagePlayer(int tile_data) {
         case 5://whi
             damage = 1;
         break;
+        case 255://whi
+            damage = 25;
+        break;
     }
     if (poisoned && damage != 0) {
         damage = damage * 2;
@@ -176,7 +179,12 @@ void randomizeField(vector<vector<int>>& boss_grid, int field_size, int field_si
             //skip boss and player
             if (boss_grid[x][y] == 100 || boss_grid[x][y] == 255) {
                 continue;
-            }
+            }//213
+            if (boss_grid[x][y] == 1) {boss_grid[x][y] = 3;continue;}
+            if (boss_grid[x][y] == 2) {boss_grid[x][y] = 1;continue;}
+            if (boss_grid[x][y] == 3) {boss_grid[x][y] = rand() % types_amount + 1;continue;}
+            if (boss_grid[x][y] == 4) {boss_grid[x][y] = rand() % (types_amount - 1) + 2;continue;}
+            // 5/white is random
             boss_grid[x][y] = (rand() % types_amount) + 1;
         }
     }
@@ -270,7 +278,6 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
             cyan("▜"), purple("█") + cyan("▛"), yellow("▀") + cyan("▜█"),
             cyan("▝") + yellow("▚"), yellow("▃" + bgBlue("▙")), yellow("▟▍")};
 
-        //['▘','▝','▀','▖','▍','▞','▛','▗','▚','▐','▜','▃','▙','▟','█',' ']
 
         //player
         //▟████▙
@@ -282,8 +289,54 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
         //▖▐▀▍▗█
         //▀▙▙█▛▘
 
-    } else {//8*4
-        cout << "make your own textures, you need 32 characters total, good luck" << endl;
+    }  else if (view_size == 4) {//8*4
+
+
+        boss_texture_left = {
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+        };
+        boss_texture_right = {
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+        };
+        player_texture_left = {
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+            "  ","  ","  ","  ",
+        };
+        player_texture_right = {
+            cyan("▗█"),cyan("██"),cyan("▀▜"),cyan("▛▚"),
+            cyan("█")+cyan(bgRed("▃")), cyan("█▘"), yellow("▗") + yellow(("▐")), yellow(("▍")) + cyan("▐"),
+            cyan("██"), yellow(" ▃"), yellow("▟▟"), yellow("▙")+ cyan("▐"),
+            cyan("█▖"), yellow(" ▜"), yellow("█▃"),yellow("▞") + cyan("▍"),
+        };
+//▗███▀▜▛▚
+//█▃█▘▗▐▍▐
+//██ ▃▟▟▙▐
+//█▖ ▜█▃▞▐
+
+//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▍ ▞ ▚ ▛ ▜ ▙ ▟ █
+//before
+//▍▍▜▀▍█▞▍
+//▙▝ ▐▘▀▝▃
+// ▃▖█▚▗ ▞
+//▀▖▀▙▗▜▜▘
+//after
+//▗▟██▍█▖▖
+//▛▀▀▜▘▀▝▚
+//▙  ▟▚▗ ▞
+//▀█▀▙▗▜▜▘
+
+
+    } else {//10*5
+        cout << "make your own textures, you need 50 characters total, good luck" << endl;
         exit(0);
     }
 
@@ -343,7 +396,7 @@ void PsRandField(int seed)
 //    cout << seed << endl;
     string userReturns, action;
     int color_types, view_size, number_of_types, arena_size, arena_size_horizontal, max_boss_hp, max_player_hp;
-    view_size = 3;
+    view_size = 4;
     arena_size = 3;
     arena_size_horizontal = 7;
     vector<vector<int>> boss_grid;
