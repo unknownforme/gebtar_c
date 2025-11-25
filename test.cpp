@@ -14,10 +14,8 @@ int main(int argc, char *argv[])
     string boss_looks;
     #ifdef _WIN32
         SetConsoleOutputCP(CP_UTF8);
+        //i think ive heard that this is default on linux
     #endif
-    cout << "trying to remake stuff" << endl;
-    // is 4 bytes
-    // is 3 bytes (for each character)
     int seed;
     if (argc > 1 && isdigit(argv[1][0])){
         seed = stoi(argv[1]);
