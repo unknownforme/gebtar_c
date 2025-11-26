@@ -5,7 +5,17 @@
 #include <cmath>
 #include <ctime>
 #include <vector>
+#include <chrono>
+#include <thread>
 using namespace std;
+
+void cursorUp (int amount = 1) {
+    cout << "\033[" << amount << "A";
+}
+void cursorDown (int amount) {
+    cout << "\033[" << amount << "B";
+}
+
 void clearcmd ()
 {
     cout << "\033[2J\033[H";
@@ -128,6 +138,7 @@ string healthBar(double hp_remaining, double max_hp) {
         return "[" + full_hp_bar + "]";
     }
     hp_bar_uncolored = full_hp_bar.substr(usage_of_hp_bar);
+
     return "[" + hp_bar_colored + hp_bar_uncolored + "]";
 }
 
@@ -255,10 +266,12 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
         boss_texture_left = {bgCyan(red("▛▜"))};
         boss_texture_right = {bgCyan(red("▛▜"))};
     } else if (view_size == 2) {//4*2
+
         player_texture_left = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
         player_texture_right = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
         boss_texture_left = {white("▞▛"), white("▜█"), white("▛▛"), white("▛ ")};
         boss_texture_right = {white("█▛"), white("▜▚"), white(" ▜"), white(" ▜▜")};
+
     } else if (view_size == 3) {//6*3
         boss_texture_left = {
             "▟█", "██", "█▙",
@@ -271,7 +284,7 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
         //todo change texture to left or right depending on eachother position
         player_texture_left = {
             cyan("▟█"), cyan("██"), cyan("█▙"),
-            cyan("█▛"), yellow("▀") + cyan("▜"), purple("█") + cyan("▛"),
+            cyan("█▛"), yellow("▀") + cyan("▜"), cyan(bgPurple("▃")) + cyan("▛"),
             yellow("▐▙"), yellow(bgBlue("▟")) + yellow("▃"), yellow("▞") + cyan("▘")};
         player_texture_right = {
             cyan("▟█"), cyan("██"), cyan("█▙"),
@@ -291,19 +304,36 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 
     }  else if (view_size == 4) {//8*4
 
+//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▍ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
 
+//▗▟██▛▀▚
+//▝▛█▘▖ ▟▚
+//▞▛▛▙▃▟▛▟
+//▐▟▟▃▃▃▛▘
         boss_texture_left = {
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
+            ("▗▟"),("██"),("▛▀"),("▚ "),
+
+            ("▝▛"),("█▘"),red("▖ "),("▟▚"),
+
+            ("▞▛"),("▛▙"),("▃▟"),("▛▟"),
+
+            ("▐▟"),("▟▃"),("▃▃"),("▛▘"),
         };
+
+
+
         boss_texture_right = {
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
+            (" ▞"), ("▀▜"), ("██"), ("▙▖"),
+
+            ("▞▙"), red(" ▗"), ("▝█"), ("▜▘"),
+
+            ("▙▜"), ("▙▃"), ("▟▜"), ("▜▚"),
+
+            ("▝▜"), ("▃▃"), ("▃▙"), ("▙▍"),
         };
+
+//think im gonna use this if you died lol
         player_texture_left = {
             "  ","  ","  ","  ",
             "  ","  ","  ","  ",
@@ -321,20 +351,24 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 //██ ▃▟▟▙▐
 //█▖ ▜█▃▞▐
 
-//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █
-//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▍ ▞ ▚ ▛ ▜ ▙ ▟ █
+
+
 //before
+//▃▙▞▐▙▀▝▙
+//▝▛▃▍▖ ▟▍
+//█▝▛▖▃▐▝▝
+//▗▗▗▍▞▞▝█
+//after
+//▗▟██▛▀▚
+//▝▛█▘▖ ▟▚
+//▞▛▛▙▃▟▝▟
+//▐▟▟▃▟▃▛▘
+
+
 //▍▍▜▀▍█▞▍
 //▙▝ ▐▘▀▝▃
 // ▃▖█▚▗ ▞
 //▀▖▀▙▗▜▜▘
-//after
-//▗▟██▍█▖▖
-//▛▀▀▜▘▀▝▚
-//▙  ▟▚▗ ▞
-//▀█▀▙▗▜▜▘
-
-
     } else {//10*5
         cout << "make your own textures, you need 50 characters total, good luck" << endl;
         exit(0);
@@ -418,8 +452,14 @@ void PsRandField(int seed)
     while(boss_hp > 0 && player_hp > 0) {
         bool continue_loop = false;
         clearcmd();
+        string poisoned_text;
+        if(poisoned) {
+            poisoned_text = purple(" + poisoned");
+        } else {
+            poisoned_text = "";
+        }
         cout << strPadRight("boss: ", 10) << healthBar(boss_hp, max_boss_hp) << endl;
-        cout << strPadRight("player: ", 10) << healthBar(player_hp, max_player_hp) << "\n" << endl;
+        cout << strPadRight("player: ", 10) << healthBar(player_hp, max_player_hp) << poisoned_text << "\n" << endl;
         randomizeField(boss_grid, arena_size, arena_size_horizontal, number_of_types);
         printField(boss_grid, arena_size, arena_size_horizontal, view_size);
         int tile_data = 0;
@@ -443,4 +483,24 @@ void PsRandField(int seed)
             continue;
         }
     }
+    if (player_hp > 0) {
+
+    } else {
+        clearcmd();
+        cout << strPadRight("", 30) << "▗▟██▍█▖▖" << endl;
+        cout << strPadRight("", 30) << "▛▀▀▜▘▀▀▚" << endl;
+        cout << strPadRight("", 30) << "▙  ▟▚▗ ▞" << endl;
+        cout << strPadRight("", 30) << "▀" << red("█") << "▀▙▗▜" << red("▜") << "▘" << endl;
+        cout << strPadRight("", 30) << "" << endl;
+        cout << strPadRight("", 30) << "you died" << endl;
+    }
 }
+//▗▟██▍█▖▖
+//▛▀▀▜▘▀▀▚
+//▙  ▟▚▗ ▞
+//▀█▀▙▗▜▜▘
+
+//▗▟██▍█▖▖
+//▛▀▀▜▘▀▀▚
+//▙  ▟▚▗ ▞
+//▀█▀▙▗▜▜▘
