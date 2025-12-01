@@ -208,7 +208,6 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
     if (direction == "up") {
         if (player_y_pos == 0 || boss_grid[player_x_pos][player_y_pos - 1] == 100) {
             cout << "cant" << endl;
-            return 1;
         } else {
             tile_data = boss_grid[player_x_pos][player_y_pos - 1];
             boss_grid[player_x_pos][player_y_pos - 1] = 255;
@@ -304,13 +303,25 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 
     }  else if (view_size == 4) {//8*4
 
+//▚▗▜▞▃▟▖▐
+//▘▞█▟▘ ▝▜
+//▟▚▙█▐▃▖▚
+//▙▀▚▙▛▖▜▖
+
 //█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
 //▘ ▝ ▖ ▗ ▀ ▃ ▐ ▍ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
 
-//▗▟██▛▀▚
-//▝▛█▘▖ ▟▚
-//▞▛▛▙▃▟▛▟
-//▐▟▟▃▃▃▛▘
+// ▗▐▞▃▟▖▞▞
+// ▟▛▟▘ ▝▛▘
+//▞▙▛█▐▃▖▚
+//▘▘▃▀▘ ▃▛
+//▙▀▚▙▛▀▘
+
+//backup
+// ▗▐▞▃▟▖▞▞
+// ▟▛▟▘ ▝▛▘
+//▟▚▟█▐▃▖▚
+//▙▀▚█▛ ▃▀
         boss_texture_left = {
             ("▗▟"),("██"),("▛▀"),("▚ "),
 
@@ -351,8 +362,6 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 //██ ▃▟▟▙▐
 //█▖ ▜█▃▞▐
 
-
-
 //before
 //▃▙▞▐▙▀▝▙
 //▝▛▃▍▖ ▟▍
@@ -365,6 +374,7 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 //▐▟▟▃▟▃▛▘
 
 
+
 //▍▍▜▀▍█▞▍
 //▙▝ ▐▘▀▝▃
 // ▃▖█▚▗ ▞
@@ -372,6 +382,13 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
     } else {//10*5
         cout << "make your own textures, you need 50 characters total, good luck" << endl;
         exit(0);
+//a texture that you could use
+//▚█▛▍▗█▍▟▍▗
+//▚▝▟▚ ▀▗▗▀▐
+//  ▙  ▗▛▘▘▛
+//▀▗▟▃▛▚▜▀▝▖
+//▝▃▃▃▀ ▗▍ ▛
+
     }
 
     if (player_x_pos > boss_x_pos) {
@@ -500,7 +517,3 @@ void PsRandField(int seed)
 //▙  ▟▚▗ ▞
 //▀█▀▙▗▜▜▘
 
-//▗▟██▍█▖▖
-//▛▀▀▜▘▀▀▚
-//▙  ▟▚▗ ▞
-//▀█▀▙▗▜▜▘

@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     cout << "██                  ██" << endl;
     cout << "▀▜██████████████████▛▀" << endl;
     while(true) {
-        for(int xy = 0; xy < 100; xy++) {
+        for(int xy = 0; xy < 400; xy++) {
             cursorUp(6);
             cout << screenStatic(18) << endl;
             cout << screenStatic(18) << endl;
