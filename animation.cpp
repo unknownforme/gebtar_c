@@ -15,13 +15,34 @@ string strPadRight(string to_pad, int total_length, char pad_with = ' ') {//why 
     return to_pad + string(total_length - to_pad.size(), pad_with);
 }
 
+
 string bgRed (string word)
 {
     return "\033[41m"  +  word  +  "\033[0m";
 }
+string bgGreen (string word)
+{
+    return "\033[42m" + word + "\033[0m";
+}
+string bgYellow (string word)
+{
+    return "\033[43m"  +  word  +  "\033[0m";
+}
+string bgBlue (string word)
+{
+    return "\033[44m" + word + "\033[0m";
+}
 string bgPurple (string word)
 {
     return "\033[45m" + word + "\033[0m";
+}
+string bgCyan (string word)
+{
+    return "\033[46m" + word + "\033[0m";
+}
+string bgWhite (string word)
+{
+    return "\033[47m" + word + "\033[0m";
 }
 string red(string word)
 {
@@ -66,6 +87,7 @@ string screenStatic (int screen_size) {
     for (int nr = 0; nr < screen_size; nr++) {
         rand_nr = rand() % 16;
         int rand_nr_color = rand() % 7;
+        int rand_nr_bg_color = rand() % 7;
         string rand_colored_char, rand_uncolored_char = rand_chars[rand_nr];
         switch(rand_nr_color) {
             case 0: rand_colored_char = white(rand_uncolored_char); break;
@@ -75,6 +97,15 @@ string screenStatic (int screen_size) {
             case 4: rand_colored_char = purple(rand_uncolored_char); break;
             case 5: rand_colored_char = cyan(rand_uncolored_char); break;
             case 6: rand_colored_char = blue(rand_uncolored_char); break;
+        }
+        switch(rand_nr_bg_color) {
+            case 0: rand_colored_char = bgWhite(rand_colored_char); break;
+            case 1: rand_colored_char = bgGreen(rand_colored_char); break;
+            case 2: rand_colored_char = bgYellow(rand_colored_char); break;
+            case 3: rand_colored_char = bgRed(rand_colored_char); break;
+            case 4: rand_colored_char = bgPurple(rand_colored_char); break;
+            case 5: rand_colored_char = bgCyan(rand_colored_char); break;
+            case 6: rand_colored_char = bgBlue(rand_colored_char); break;
         }
         static_line.append(rand_colored_char);
     }
@@ -89,7 +120,7 @@ int main(int argc, char *argv[])
         #endif
 //    string static = {"", };
 
-    cout << "▃▟██████████████████▙▃" << endl;
+    cout << "▄▟██████████████████▙▄" << endl;
     cout << "██                  ██" << endl;
     cout << "██                  ██" << endl;
     cout << "██                  ██" << endl;
@@ -97,7 +128,7 @@ int main(int argc, char *argv[])
     cout << "██                  ██" << endl;
     cout << "▀▜██████████████████▛▀" << endl;
     while(true) {
-        for(int xy = 0; xy < 400; xy++) {
+        for(int xy = 0; xy < 200; xy++) {
             cursorUp(6);
             cout << screenStatic(18) << endl;
             cout << screenStatic(18) << endl;
@@ -115,11 +146,11 @@ int main(int argc, char *argv[])
         this_thread::sleep_for(1s);
         cursorUp(3);
         //good luck desciphering this lmao
-        cout << "\r" << "██" + strPadRight("", 4) << cyan("▗▟▚▛▐▚▚█▃") << strPadRight("", 5) + "██" << endl;//18 spaces
+        cout << "\r" << "██" + strPadRight("", 4) << cyan("▗▟▚▛▐▚▚█▄") << strPadRight("", 5) + "██" << endl;//18 spaces
         cout << "\r" << "██" + strPadRight("", 4) << cyan("█▚▀") + yellow("▞█▟▖") + cyan("▛▞") + cyan("▚") << strPadRight("", 4) + "██" << endl;
         cout << "\r" << "██" + strPadRight("", 4) << cyan("█▚") + (yellow("▘▝▝▙ ")) + cyan("▀▞▚") << strPadRight("", 4) + "██" << endl;//18 spaces
-        cout << "\r" << "██" + strPadRight("", 4) << cyan("▛▐") + (yellow("▙▃▟")) + yellow(" █▖") + cyan("▀▞") << strPadRight("", 4) + "██" << endl;
-        cout << "\r" << "██"  + strPadRight("", 4)<< cyan("▍") + yellow(" ▝▀") + (yellow("▃▞")) + yellow("▀ ") + cyan("▐▘") << strPadRight("", 4) + "██" << endl;//18 spaces
+        cout << "\r" << "██" + strPadRight("", 4) << cyan("▛▐") + (yellow("▙▄▟")) + yellow(" █▖") + cyan("▀▞") << strPadRight("", 4) + "██" << endl;
+        cout << "\r" << "██"  + strPadRight("", 4)<< cyan("▍") + yellow(" ▝▀") + (yellow("▄▞")) + yellow("▀ ") + cyan("▐▘") << strPadRight("", 4) + "██" << endl;//18 spaces
         this_thread::sleep_for(1500ms);
         cursorDown();
 

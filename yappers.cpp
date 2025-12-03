@@ -12,10 +12,13 @@ using namespace std;
 void cursorUp (int amount = 1) {
     cout << "\033[" << amount << "A";
 }
-void cursorDown (int amount) {
+void cursorDown (int amount = 1) {
     cout << "\033[" << amount << "B";
 }
-
+void clearLine ()
+{
+cout << "\033[2K";
+}
 void clearcmd ()
 {
     cout << "\033[2J\033[H";
@@ -208,6 +211,10 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
     if (direction == "up") {
         if (player_y_pos == 0 || boss_grid[player_x_pos][player_y_pos - 1] == 100) {
             cout << "cant" << endl;
+            this_thread::sleep_for(750ms);
+            cursorUp();
+            clearLine();
+            cursorUp();
         } else {
             tile_data = boss_grid[player_x_pos][player_y_pos - 1];
             boss_grid[player_x_pos][player_y_pos - 1] = 255;
@@ -242,6 +249,10 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
         tile_data = boss_grid[player_x_pos][player_y_pos] = 255;
     } else {
         cout << "didnt understand that" << endl;
+            this_thread::sleep_for(750ms);
+            cursorUp();
+            clearLine();
+            cursorUp();
     }
     return tile_data;// returns 0 if it wasnt understood, or the tiledata of the tile user stepped on
 }
@@ -274,11 +285,11 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
     } else if (view_size == 3) {//6*3
         boss_texture_left = {
             "▟█", "██", "█▙",
-            "▖▐", "▀▍", "▗█",
+            "▖▐", "▀▌", "▗█",
             "▜▚", "▚▜", "▛▘"};
         boss_texture_right = {
             "▟█", "██", "█▙",
-            "█▖", "▐▀", "▍▗",
+            "█▖", "▐▀", "▌▗",
             "▝▜", "▛▞", "▞▛"};
         //todo change texture to left or right depending on eachother position
         player_texture_left = {
@@ -288,19 +299,7 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
         player_texture_right = {
             cyan("▟█"), cyan("██"), cyan("█▙"),
             cyan("▜"), purple("█") + cyan("▛"), yellow("▀") + cyan("▜█"),
-            cyan("▝") + yellow("▚"), yellow("▃" + bgBlue("▙")), yellow("▟▍")};
-
-
-        //player
-        //▟████▙
-        //█▛▀▜█▛
-        //▟▙▟▃▞▘
-
-        //boss
-        //▟████▙
-        //▖▐▀▍▗█
-        //▀▙▙█▛▘
-
+            cyan("▝") + yellow("▚"), yellow("▃" + bgBlue("▙")), yellow("▟▌")};
     }  else if (view_size == 4) {//8*4
 
 //▚▗▜▞▃▟▖▐
@@ -309,19 +308,8 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 //▙▀▚▙▛▖▜▖
 
 //█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
-//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▍ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
+//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▌ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
 
-// ▗▐▞▃▟▖▞▞
-// ▟▛▟▘ ▝▛▘
-//▞▙▛█▐▃▖▚
-//▘▘▃▀▘ ▃▛
-//▙▀▚▙▛▀▘
-
-//backup
-// ▗▐▞▃▟▖▞▞
-// ▟▛▟▘ ▝▛▘
-//▟▚▟█▐▃▖▚
-//▙▀▚█▛ ▃▀
         boss_texture_left = {
             ("▗▟"),("██"),("▛▀"),("▚ "),
 
@@ -341,53 +329,49 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
 
             ("▙▜"), ("▙▃"), ("▟▜"), ("▜▚"),
 
-            ("▝▜"), ("▃▃"), ("▃▙"), ("▙▍"),
+            ("▝▜"), ("▃▃"), ("▃▙"), ("▙▌"),
         };
 
-//think im gonna use this if you died lol
+//todo change player for the size 4
+
+//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
+//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▌ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
+
+//  ▞▛▛▞█▞▖
+//  ▞▛▀▜▚█▞▖
+//  ▃▙▟▃▟▀▌▚
+//  ▝▖  ▛▗▚▛
         player_texture_left = {
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
-            "  ","  ","  ","  ",
+            cyan("▞")+bgYellow(cyan("▛")),cyan("▛▞"),cyan("█▞"),cyan("▖ "),
+            yellow("▞▛"),yellow("▀▜"),bgYellow(cyan("▜█")),cyan("▞▖"),
+            yellow("▃") + yellow("▙"),bgBlue(yellow("▟")) + yellow("▃"),cyan("▟▀"),cyan("▌▚"),
+            yellow("▝▖"),yellow("  "),cyan("▛▗"),cyan("▚▛"),
         };
         player_texture_right = {
             cyan("▗█"),cyan("██"),cyan("▀▜"),cyan("▛▚"),
-            cyan("█")+cyan(bgRed("▃")), cyan("█▘"), yellow("▗") + yellow(("▐")), yellow(("▍")) + cyan("▐"),
+            cyan("█")+cyan(bgRed("▃")), cyan("█▘"), yellow("▗") + yellow(("▐")), yellow(("▌")) + cyan("▐"),
             cyan("██"), yellow(" ▃"), yellow("▟▟"), yellow("▙")+ cyan("▐"),
-            cyan("█▖"), yellow(" ▜"), yellow("█▃"),yellow("▞") + cyan("▍"),
+            cyan("█▖"), yellow(" ▜"), yellow("█▃"),yellow("▞") + cyan("▌"),
         };
 //▗███▀▜▛▚
-//█▃█▘▗▐▍▐
+//█▃█▘▗▐▌▐
 //██ ▃▟▟▙▐
 //█▖ ▜█▃▞▐
 
-//before
-//▃▙▞▐▙▀▝▙
-//▝▛▃▍▖ ▟▍
-//█▝▛▖▃▐▝▝
-//▗▗▗▍▞▞▝█
-//after
-//▗▟██▛▀▚
-//▝▛█▘▖ ▟▚
-//▞▛▛▙▃▟▝▟
-//▐▟▟▃▟▃▛▘
 
 
 
-//▍▍▜▀▍█▞▍
-//▙▝ ▐▘▀▝▃
-// ▃▖█▚▗ ▞
-//▀▖▀▙▗▜▜▘
+
     } else {//10*5
         cout << "make your own textures, you need 50 characters total, good luck" << endl;
         exit(0);
-//a texture that you could use
-//▚█▛▍▗█▍▟▍▗
+//a texture that you could use to make the 5x10
+
+//▚█▛▌▗█▌▟▌▗
 //▚▝▟▚ ▀▗▗▀▐
 //  ▙  ▗▛▘▘▛
 //▀▗▟▃▛▚▜▀▝▖
-//▝▃▃▃▀ ▗▍ ▛
+//▝▃▃▃▀ ▗▌ ▛
 
     }
 
@@ -466,21 +450,33 @@ void PsRandField(int seed)
 
     //gives the graphical output
     boss_grid = createField(arena_size, arena_size_horizontal, number_of_types, seed);
+    cout << endl;
+    cout << endl;
+    cout << endl;
+    cursorUp();
     while(boss_hp > 0 && player_hp > 0) {
         bool continue_loop = false;
-        clearcmd();
         string poisoned_text;
         if(poisoned) {
             poisoned_text = purple(" + poisoned");
         } else {
             poisoned_text = "";
         }
+        cursorUp(1);
+        clearLine();
+
         cout << strPadRight("boss: ", 10) << healthBar(boss_hp, max_boss_hp) << endl;
-        cout << strPadRight("player: ", 10) << healthBar(player_hp, max_player_hp) << poisoned_text << "\n" << endl;
+        clearLine();
+        cout << strPadRight("player: ", 10) << healthBar(player_hp, max_player_hp) << poisoned_text << endl;
+        cout << endl;
         randomizeField(boss_grid, arena_size, arena_size_horizontal, number_of_types);
         printField(boss_grid, arena_size, arena_size_horizontal, view_size);
+        cursorUp(4 + (arena_size * view_size));
+
+
         int tile_data = 0;
         while(tile_data == 0) {
+            clearLine();
             cin >> action;
             if (action == "hit" && isAdjacent(player_x_pos, player_y_pos, boss_x_pos, boss_y_pos, false)) {
                 cout << "yeppers" << endl;
@@ -495,6 +491,8 @@ void PsRandField(int seed)
             tile_data = movePlayer(boss_grid, arena_size, arena_size_horizontal, action);
             damagePlayer(tile_data);
         }
+            cursorDown();
+
         if (continue_loop) {
             continue_loop  = false;
             continue;
@@ -504,15 +502,16 @@ void PsRandField(int seed)
 
     } else {
         clearcmd();
-        cout << strPadRight("", 30) << "▗▟██▍█▖▖" << endl;
+        cout << strPadRight("", 30) << "▗▟██▌█▖▖" << endl;
         cout << strPadRight("", 30) << "▛▀▀▜▘▀▀▚" << endl;
         cout << strPadRight("", 30) << "▙  ▟▚▗ ▞" << endl;
         cout << strPadRight("", 30) << "▀" << red("█") << "▀▙▗▜" << red("▜") << "▘" << endl;
         cout << strPadRight("", 30) << "" << endl;
         cout << strPadRight("", 30) << "you died" << endl;
+        cin;
     }
 }
-//▗▟██▍█▖▖
+//▗▟██▌█▖▖
 //▛▀▀▜▘▀▀▚
 //▙  ▟▚▗ ▞
 //▀█▀▙▗▜▜▘
