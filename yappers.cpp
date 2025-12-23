@@ -9,79 +9,27 @@
 #include <thread>
 using namespace std;
 
-void cursorUp (int amount = 1) {
-    cout << "\033[" << amount << "A";
-}
-void cursorDown (int amount = 1) {
-    cout << "\033[" << amount << "B";
-}
-void clearLine ()
-{
-cout << "\033[2K";
-}
-void clearcmd ()
-{
-    cout << "\033[2J\033[H";
-}
-string red(string word)
-{
-    return "\033[31m" + word + "\033[0m";
-}
-string green (string word)
-{
-    return "\033[32m" + word + "\033[0m";
-}
-string yellow (string word)
-{
-    return "\033[33m" + word + "\033[0m";
-}
-string blue (string word)
-{
-    return "\033[34m" + word + "\033[0m";
-}
-string purple (string word)
-{
-    return "\033[35m" + word + "\033[0m";
-}
-string cyan (string word)
-{
-    return "\033[36m" + word + "\033[0m";
-}
-string white (string word)
-{
-    return "\033[37m" + word + "\033[0m";
-}
-string bgRed (string word)
-{
-    return "\033[41m"  +  word  +  "\033[0m";
-}
-string bgGreen (string word)
-{
-    return "\033[42m" + word + "\033[0m";
-}
-string bgYellow (string word)
-{
-    return "\033[43m"  +  word  +  "\033[0m";
-}
-string bgBlue (string word)
-{
-    return "\033[44m" + word + "\033[0m";
-}
-string bgPurple (string word)
-{
-    return "\033[45m" + word + "\033[0m";
-}
-string bgCyan (string word)
-{
-    return "\033[46m" + word + "\033[0m";
-}
-string bgWhite (string word)
-{
-    return "\033[47m" + word + "\033[0m";
-}
+void cursorUp (int amount = 1) {cout << "\033[" << amount << "A";}
+void cursorDown (int amount = 1) {cout << "\033[" << amount << "B";}
+void clearLine (){cout << "\033[2K" << flush;}
+void clearcmd (){cout << "\033[2J\033[H";}
+string red(string word){return "\033[31m" + word + "\033[0m";}
+string green (string word){return "\033[32m" + word + "\033[0m";}
+string yellow (string word){return "\033[33m" + word + "\033[0m";}
+string blue (string word){return "\033[34m" + word + "\033[0m";}
+string purple (string word){return "\033[35m" + word + "\033[0m";}
+string cyan (string word){return "\033[36m" + word + "\033[0m";}
+string white (string word){return "\033[37m" + word + "\033[0m";}
+string bgRed (string word){return "\033[41m"  +  word  +  "\033[0m";}
+string bgGreen (string word){return "\033[42m" + word + "\033[0m";}
+string bgYellow (string word){return "\033[43m"  +  word  +  "\033[0m";}
+string bgBlue (string word){return "\033[44m" + word + "\033[0m";}
+string bgPurple (string word){return "\033[45m" + word + "\033[0m";}
+string bgCyan (string word){return "\033[46m" + word + "\033[0m";}
+string bgWhite (string word){return "\033[47m" + word + "\033[0m";}
 //get defined elsewhere
-int player_x_pos, player_y_pos, boss_x_pos, boss_y_pos, player_hp, boss_hp;
-bool poisoned = false;
+int player_x_pos, player_y_pos, boss_x_pos, boss_y_pos, heal_item_x, heal_item_y, player_hp, boss_hp, turn;
+bool poisoned = false, heal_item_exists = false;
 
 void damagePlayer(int tile_data) {
     int damage = 0;
@@ -106,6 +54,9 @@ void damagePlayer(int tile_data) {
         break;
         case 255://whi
             damage = 25;
+        break;
+        case 500://whi
+            damage = -100;
         break;
     }
     if (poisoned && damage != 0) {
@@ -191,16 +142,39 @@ void randomizeField(vector<vector<int>>& boss_grid, int field_size, int field_si
     for (int y = 0; y < field_size; y++) {
         for (int x = 0; x < field_size_horizontal; x++) {
             //skip boss and player
-            if (boss_grid[x][y] == 100 || boss_grid[x][y] == 255) {
+            if (boss_grid[x][y] == 100 || boss_grid[x][y] == 255 || boss_grid[x][y] == 500) {
                 continue;
-            }//213
+            }
             if (boss_grid[x][y] == 1) {boss_grid[x][y] = 3;continue;}
             if (boss_grid[x][y] == 2) {boss_grid[x][y] = 1;continue;}
             if (boss_grid[x][y] == 3) {boss_grid[x][y] = rand() % types_amount + 1;continue;}
             if (boss_grid[x][y] == 4) {boss_grid[x][y] = rand() % (types_amount - 1) + 2;continue;}
             // 5/white is random
             boss_grid[x][y] = (rand() % types_amount) + 1;
+            if (!heal_item_exists){
+                if (rand() % 50 == 25) {
+                    boss_grid[x][y] = 500;
+                    heal_item_exists = true;
+                }
+            }
         }
+    }
+}
+
+void clearAndUp(int amount = 1)
+{
+    while (amount > 0) {
+        cursorUp();
+        clearLine();
+        amount--;
+    }
+}
+void clearAndDown(int amount = 1)
+{
+    while (amount > 0) {
+        cursorDown();
+        clearLine();
+        amount--;
     }
 }
 
@@ -212,9 +186,7 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
         if (player_y_pos == 0 || boss_grid[player_x_pos][player_y_pos - 1] == 100) {
             cout << "cant" << endl;
             this_thread::sleep_for(750ms);
-            cursorUp();
-            clearLine();
-            cursorUp();
+            clearAndUp(2);
         } else {
             tile_data = boss_grid[player_x_pos][player_y_pos - 1];
             boss_grid[player_x_pos][player_y_pos - 1] = 255;
@@ -223,6 +195,8 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
     } else if (direction == "down") {
         if (player_y_pos == field_size - 1 || boss_grid[player_x_pos][player_y_pos + 1] == 100) {
             cout << "cant" << endl;
+            this_thread::sleep_for(750ms);
+            clearAndUp(2);
         } else {
             tile_data = boss_grid[player_x_pos][player_y_pos + 1];
             boss_grid[player_x_pos][player_y_pos + 1] = 255;
@@ -231,6 +205,8 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
     } else if (direction == "left") {
         if (player_x_pos == 0 || boss_grid[player_x_pos - 1][player_y_pos] == 100) {
             cout << "cant" << endl;
+            this_thread::sleep_for(750ms);
+            clearAndUp(2);
         } else {
             tile_data = boss_grid[player_x_pos - 1][player_y_pos];
             boss_grid[player_x_pos - 1][player_y_pos] = 255;
@@ -239,13 +215,16 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
     } else if (direction == "right") {
         if (player_x_pos == field_size_horizontal - 1 || boss_grid[player_x_pos + 1][player_y_pos] == 100) {
             cout << "cant" << endl;
+            this_thread::sleep_for(750ms);
+            clearAndUp(2);
         } else {
             tile_data = boss_grid[player_x_pos + 1][player_y_pos];
             boss_grid[player_x_pos + 1][player_y_pos] = 255;
             ++player_x_pos;
         }
     } else if (direction == "stay") {
-        cout << "okie :3" << endl;
+        cout << "you stay, good boy" << endl;
+        clearAndUp(1);
         tile_data = boss_grid[player_x_pos][player_y_pos] = 255;
     } else {
         cout << "didnt understand that" << endl;
@@ -259,8 +238,9 @@ int movePlayer(vector<vector<int>>& boss_grid, int field_size, int field_size_ho
 
 void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_horizontal, int view_size = 2)
 {
-    int boss_texture_part, player_texture_part;
-    player_texture_part = boss_texture_part = 0;
+    int boss_texture_part = 0, player_texture_part = 0, health_boost_part = 0;
+
+    vector<string> health_boost;
 
     vector<string> boss_texture;
     vector<string> boss_texture_left;
@@ -273,42 +253,55 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
     if (view_size == 1) {//2*1
         player_texture_left = {bgCyan(blue("▟▙"))};
         player_texture_right = {bgCyan(blue("▟▙"))};
+
         boss_texture_left = {bgCyan(red("▛▜"))};
         boss_texture_right = {bgCyan(red("▛▜"))};
+
+        health_boost = {red("▝▞")};
+
     } else if (view_size == 2) {//4*2
 
         player_texture_left = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
         player_texture_right = {blue("▛▚"), blue("▞▜"), blue("▙") + red("▘"), red("▝") + blue("▟")};
+
         boss_texture_left = {white("▞▛"), white("▜█"), white("▛▛"), white("▛ ")};
-        boss_texture_right = {white("█▛"), white("▜▚"), white(" ▜"), white(" ▜▜")};
+        boss_texture_right = {white("█▛"), white("▜▚"), white(" ▜"), white("▜▜")};
+
+        health_boost = {red("▟▙"),red("▟▙"),red("▝▜"),red("▛▘")};
 
     } else if (view_size == 3) {//6*3
         boss_texture_left = {
             "▟█", "██", "█▙",
             "▖▐", "▀▌", "▗█",
-            "▜▚", "▚▜", "▛▘"};
+            "▜▚", "▚▜", "▛▘"
+        };
+
         boss_texture_right = {
             "▟█", "██", "█▙",
             "█▖", "▐▀", "▌▗",
-            "▝▜", "▛▞", "▞▛"};
-        //todo change texture to left or right depending on eachother position
+            "▝▜", "▛▞", "▞▛"
+        };
+        //change texture to left or right depending on eachother position
         player_texture_left = {
             cyan("▟█"), cyan("██"), cyan("█▙"),
             cyan("█▛"), yellow("▀") + cyan("▜"), cyan(bgPurple("▃")) + cyan("▛"),
-            yellow("▐▙"), yellow(bgBlue("▟")) + yellow("▃"), yellow("▞") + cyan("▘")};
+            yellow("▐▙"), yellow(bgBlue("▟")) + yellow("▃"), yellow("▞") + cyan("▘")
+        };
+
         player_texture_right = {
             cyan("▟█"), cyan("██"), cyan("█▙"),
             cyan("▜"), purple("█") + cyan("▛"), yellow("▀") + cyan("▜█"),
-            cyan("▝") + yellow("▚"), yellow("▃" + bgBlue("▙")), yellow("▟▌")};
+            cyan("▝") + yellow("▚"), yellow("▃" + bgBlue("▙")), yellow("▟▌")
+        };
+
+        health_boost = {
+            red("▄█"),red("▖▗"),red("█▄"),
+            red("██"),red("██"),red("██"),
+            red(" ▀"),red("██"),red("▀ "),
+        };
+
     }  else if (view_size == 4) {//8*4
 
-//▚▗▜▞▃▟▖▐
-//▘▞█▟▘ ▝▜
-//▟▚▙█▐▃▖▚
-//▙▀▚▙▛▖▜▖
-
-//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
-//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▌ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
 
         boss_texture_left = {
             ("▗▟"),("██"),("▛▀"),("▚ "),
@@ -332,32 +325,28 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
             ("▝▜"), ("▃▃"), ("▃▙"), ("▙▌"),
         };
 
-//todo change player for the size 4
 
-//█ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █
-//▘ ▝ ▖ ▗ ▀ ▃ ▐ ▌ ▞ ▚ ▛ ▜ ▙ ▟ █ ▓ ▒ ░
-
-//  ▞▛▛▞█▞▖
-//  ▞▛▀▜▚█▞▖
-//  ▃▙▟▃▟▀▌▚
-//  ▝▖  ▛▗▚▛
-        player_texture_left = {
+        player_texture_right = {
             cyan("▞")+bgYellow(cyan("▛")),cyan("▛▞"),cyan("█▞"),cyan("▖ "),
             yellow("▞▛"),yellow("▀▜"),bgYellow(cyan("▜█")),cyan("▞▖"),
             yellow("▃") + yellow("▙"),bgBlue(yellow("▟")) + yellow("▃"),cyan("▟▀"),cyan("▌▚"),
             yellow("▝▖"),yellow("  "),cyan("▛▗"),cyan("▚▛"),
         };
-        player_texture_right = {
-            cyan("▗█"),cyan("██"),cyan("▀▜"),cyan("▛▚"),
-            cyan("█")+cyan(bgRed("▃")), cyan("█▘"), yellow("▗") + yellow(("▐")), yellow(("▌")) + cyan("▐"),
-            cyan("██"), yellow(" ▃"), yellow("▟▟"), yellow("▙")+ cyan("▐"),
-            cyan("█▖"), yellow(" ▜"), yellow("█▃"),yellow("▞") + cyan("▌"),
-        };
-//▗███▀▜▛▚
-//█▃█▘▗▐▌▐
-//██ ▃▟▟▙▐
-//█▖ ▜█▃▞▐
 
+        player_texture_left = {
+            cyan("▗█"),cyan("█▜"),cyan("█▛"),cyan("█▖"),
+            cyan("█▐"),cyan("▘█"),cyan("▟▜"),cyan("▙▙"),
+            cyan("▌")+yellow("▄"),bgBlue(("▐"))+cyan("▝"),cyan("▀█"),cyan("▚█"),
+            yellow(" ▀"),yellow("██"),yellow("▀")+cyan("▐"),cyan("▗▜"),
+        };
+
+
+        health_boost = {
+            red("▗█"),red("█▖"),red("▗█"),red("█▖"),
+            red("██"),red("██"),red("██"),red("██"),
+            red("▀█"),red("██"),red("██"),red("█▀"),
+            red("  "),red("▀█"),red("█▀"),red("  "),
+        };
 
 
 
@@ -417,6 +406,10 @@ void printField(vector<vector<int>> boss_grid, int arena_size, int arena_size_ho
                             cout << player_texture[player_texture_part];
                             ++player_texture_part;
                         break;
+                        case 500://player
+                            cout << health_boost[health_boost_part];
+                            ++health_boost_part;
+                        break;
 
                     }
                 }
@@ -436,8 +429,8 @@ void PsRandField(int seed)
     arena_size_horizontal = 7;
     vector<vector<int>> boss_grid;
     color_types = 5;
-    max_boss_hp = boss_hp = 7500;
-    max_player_hp = player_hp = 2500;
+    max_boss_hp = boss_hp = 2500;
+    max_player_hp = player_hp = 1000;
 
     string field_types[] = {"red", "yellow", "green", "purple", "white"};
     number_of_types = (sizeof(field_types)/sizeof(field_types[0]));
@@ -455,6 +448,7 @@ void PsRandField(int seed)
     cout << endl;
     cursorUp();
     while(boss_hp > 0 && player_hp > 0) {
+        if (turn != 0){cursorUp(3 + (arena_size * view_size));}
         bool continue_loop = false;
         string poisoned_text;
         if(poisoned) {
@@ -462,27 +456,25 @@ void PsRandField(int seed)
         } else {
             poisoned_text = "";
         }
-        cursorUp(1);
-        clearLine();
-
-        cout << strPadRight("boss: ", 10) << healthBar(boss_hp, max_boss_hp) << endl;
+        clearAndUp();
+                cout << strPadRight("boss: ", 10) << healthBar(boss_hp, max_boss_hp) << endl;
         clearLine();
         cout << strPadRight("player: ", 10) << healthBar(player_hp, max_player_hp) << poisoned_text << endl;
         cout << endl;
         randomizeField(boss_grid, arena_size, arena_size_horizontal, number_of_types);
-        printField(boss_grid, arena_size, arena_size_horizontal, view_size);
-        cursorUp(4 + (arena_size * view_size));
 
+
+
+        printField(boss_grid, arena_size, arena_size_horizontal, view_size);
 
         int tile_data = 0;
         while(tile_data == 0) {
             clearLine();
             cin >> action;
             if (action == "hit" && isAdjacent(player_x_pos, player_y_pos, boss_x_pos, boss_y_pos, false)) {
-                cout << "yeppers" << endl;
                 ++arena_size;
                 ++arena_size_horizontal;
-                boss_hp = boss_hp - 1000;
+                boss_hp = boss_hp - 250;
                 boss_grid = createField(arena_size, arena_size_horizontal, number_of_types, seed);
                 continue_loop = true;
                 tile_data = 999;
@@ -491,7 +483,7 @@ void PsRandField(int seed)
             tile_data = movePlayer(boss_grid, arena_size, arena_size_horizontal, action);
             damagePlayer(tile_data);
         }
-            cursorDown();
+        turn++;
 
         if (continue_loop) {
             continue_loop  = false;
